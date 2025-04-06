@@ -1,3 +1,4 @@
+# Name: Santosh Pant
 import random
 import glob
 import sys
@@ -21,31 +22,25 @@ or optioanlly with parameters: python3 babbler.py 2 tests/test1.txt 5
 #   - values are either lists or Bags
 # Starter states are a list of words (could have been a Bag; either an ordered or unordered collection, with duplicates allowed)
 # When we pick a word, we transition to a new state
-# e.g. suppose we are using bigrams and are at the state ‘the dog’ and we pick the word ‘runs’. 
-# Our new state is ‘dog runs’, so we look up that state in our dictionary, and then get the next word, and so on…
-# Ending states can generate a special "stop" symbol; we will use ‘EOL’.
-#   If we generate the word ‘EOL’, then the sentence is over. Since all words are lower-case, this won’t be confused for a legitimate word
+# e.g. suppose we are using bigrams and are at the state 'the dog' and we pick the word 'runs'. 
+# Our new state is 'dog runs', so we look up that state in our dictionary, and then get the next word, and so on…
+# Ending states can generate a special "stop" symbol; we will use 'EOL'.
+#   If we generate the word 'EOL', then the sentence is over. Since all words are lower-case, this won't be confused for a legitimate word
 
 # --------------------- Tasks --------------------------------
 # class Babbler:
-    # def __init__(self, n, seed=None)      # already completed with initial data structures
-    # def add_file(self, filename)          # already completed; calls add_sentence(), so go there next, read comments, and plan out your steps
-    # def add_sentence(self, sentence)      # implement this
-    # def get_starters(self)                # implement this
-    # def get_stoppers(self)                # implement this
-    # def get_successors(self, ngram)       # implement this
-    # def get_all_ngrams(self)              # implement this
-    # def has_successor(self, ngram)        # implement this
-    # def get_random_successor(self, ngram) # implement this
-    # def babble(self)                      # implement this
+#     def __init__(self, n, seed=None):      # already completed with initial data structures
+#     def add_file(self, filename):          # already completed; calls add_sentence(), so go there next, read comments, and plan out your steps
+#     def add_sentence(self, sentence):      # implement this
+#     def get_starters(self):                # implement this
+#     def get_stoppers(self):                # implement this
+#     def get_successors(self, ngram):       # implement this
+#     def get_all_ngrams(self):              # implement this
+#     def has_successor(self, ngram):        # implement this
+#     def get_random_successor(self, ngram): # implement this
+#     def babble(self):                      # implement this
 
 # ------------------- Tips ----------------------------------
-# read through all the comments in the below functions before beginning to code
-# remember that our states are n-grams, so whatever the n value is, that's how many words per state (including starters and stoppers)
-# our successors (the value for each key in our dictionary) are strings representing words (not states, since n-gram states could be of multiple words)
-# since we will represent your n-grams as strings, remember to separate words with a space 
-# when updating your state, make sure you don't end up with extra spaces or you won't find it in the dictionary
-# add print statements while debugging to ensure is step in your process is working as intended
 
 debugging = False
 
@@ -111,9 +106,43 @@ class Babbler:
         and that any n-grams that stops a sentence should be followed by the
         special symbol 'EOL' in the state transition table. 'EOL' is short for 'end of line'; since it is capitalized and all our input texts are lower-case, it will be unambiguous.
         """
+        # Split the sentence into words
+        words = sentence.split()
 
-        pass #The pass statement is used as a placeholder for future code. When the pass statement is executed, nothing happens, but you avoid getting an error when empty code is not allowed. Empty code is not allowed in loops, function definitions, class definitions, or in if statements.
+        # Convert each word to lowercase
+        words = [word.lower() for word in words]
 
+        # Skip empty sentences
+        if not words:
+            return
+            
+        # Here, I am iterating through the words and creating n-grams
+        for i in range(len(words) - self.n + 1):
+            # Create current n-gram
+            # I am joining the words to create the n-gram
+            current_ngram = ' '.join(words[i:i + self.n])
+            
+            # If this is the first n-gram in the sentence, add it to starters
+            if i == 0:
+                self.starters.append(current_ngram)
+            
+            # If this is the last n-gram in the sentence, add it to stoppers
+            if i == len(words) - self.n:
+                self.stoppers.append(current_ngram)
+            
+            # Add transition to next word or EOL
+            # I am checking if there is a next word
+            if i + self.n < len(words):
+                next_word = words[i + self.n]
+            else:
+                next_word = 'EOL'
+            
+            # Update brain graph with transition
+            # I am checking if the current n-gram is in the brain graph
+            if current_ngram not in self.brainGraph:
+                self.brainGraph[current_ngram] = []
+            # I am adding the next word to the brain graph
+            self.brainGraph[current_ngram].append(next_word)
 
     def get_starters(self):
         """
@@ -121,18 +150,16 @@ class Babbler:
         The resulting list may contain duplicates, because one n-gram may start
         multiple sentences. Probably a one-line method.
         """
-        pass
+        return self.starters
     
-
     def get_stoppers(self):
         """
         Return a list of all the n-grams that stop any sentence we've seen.
         The resulting value may contain duplicates, because one n-gram may stop
         multiple sentences. Probably a one-line method.
         """
-        pass
-
-
+        return self.stoppers
+    
     def get_successors(self, ngram):
         """
         Return a list of words that may follow a given n-gram.
@@ -145,18 +172,20 @@ class Babbler:
         If n=3, then the n-gram 'the dog dances' is followed by 'quickly' one time, and 'with' two times.
         If the given state never occurs, return an empty list.
         """
-
-        pass
+        # I am checking if the n-gram is in the brain graph
+        if ngram in self.brainGraph:
+            # I am returning the list of words that follow the n-gram
+            return self.brainGraph[ngram]
+        # I am returning an empty list if the n-gram is not in the brain graph
+        return []
     
-
     def get_all_ngrams(self):
         """
         Return all the possible n-grams (sequences of n words), that we have seen across all sentences.
         Probably a one-line method.
         """
-
-        pass
-
+        # I am returning all the possible n-grams
+        return list(self.brainGraph.keys())
     
     def has_successor(self, ngram):
         """
@@ -165,9 +194,8 @@ class Babbler:
         because ngrams with no successor words must not have occurred in the training sentences.
         Probably a one-line method.
         """
-
-        pass
-    
+        # I am checking if the n-gram is in the brain graph and if it has a successor word 
+        return ngram in self.brainGraph and len(self.brainGraph[ngram]) > 0
     
     def get_random_successor(self, ngram):
         """
@@ -180,10 +208,14 @@ class Babbler:
         and we call get_random_next_word() for the state 'the dog dances',
         we should get 'quickly' about 1/3 of the time, and 'with' 2/3 of the time.
         """
+        # I am checking if the n-gram is in the brain graph
+        if not self.has_successor(ngram):
+            # I am returning None if the n-gram is not in the brain graph
+            return None
+        
 
-        pass
+        return random.choice(self.brainGraph[ngram])
     
-
     def babble(self):
         """
         Generate a random sentence using the following algorithm:
@@ -198,9 +230,35 @@ class Babbler:
             Our example state is now: 'b c d' 
         6: Repeat from step 2.
         """
-
-        pass
+        # Handle the case where we have no starters
+        if not self.starters:
+            return ""
+        
+        # 1: Pick a starter n-gram
+        current_ngram = random.choice(self.starters)
+        sentence = current_ngram
+        
+        while True:
+            # 2: Choose a successor word
+            if not self.has_successor(current_ngram):
+                break
+                
+            next_word = self.get_random_successor(current_ngram)
             
+            # 3: Check if we've reached the end of the sentence
+            if next_word == 'EOL':
+                break
+                
+            # 4: Add the word to the sentence
+            sentence += " " + next_word
+            
+            # 5: Update current n-gram by removing first word and adding new word
+            words = current_ngram.split()
+            words.pop(0)  # Remove first word
+            words.append(next_word)  # Add new word
+            current_ngram = " ".join(words)
+        
+        return sentence
 
 # nothing to change here; read, understand, move along
 def main(n=3, filename='tests/test1.txt', num_sentences=5):
